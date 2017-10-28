@@ -1,0 +1,152 @@
+
+
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.open("GET","https://www.alphavantage.co/query?function=SMA&symbol=FB&interval=daily&time_period=10&series_type=close&apikey=")
+
+
+
+<!DOCTYPE HTML>
+
+<html>
+
+  <head>
+    <meta charset="utf-8"/>
+  <title>Homework 4</title>
+  <script type="text/javascript">
+    function  viewJSON(what){
+      var URL = what.URL.value;   
+      function  loadJSON(url) {
+      if  (window.XMLHttpRequest)
+      {// code  for IE7+, Firefox,  Chrome, Opera,  Safari
+      xmlhttp=new XMLHttpRequest();
+      } else  {// code  for IE6,  IE5
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");   }
+      xmlhttp.open("GET",url,false);
+      
+      try {xmlhttp.send(); return JSON.parse(xmlhttp.responseText);
+      	
+      }
+      catch(error){
+      	if (xmlhttp.status == 404){
+      		alert ("This file doe not exist in the path!");
+      	}else
+      	    	{alert("It is not a valid JSON file!");}
+      return false;}
+      //return  undefined;      
+      }
+      if (URL == null || URL =="") {
+        alert("The input should not be empty!");
+        //exit();
+      } else{
+        jsonObj = loadJSON(URL);
+        if  (window.ActiveXObject)  //if  IE, simply  execute script  (due  to  async prop).
+        {   if  (jsonObj.parseError.errorCode !=  0)  {
+        var myErr = jsonObj.parseError;
+        generateError(jsonObj);
+        hWin =  window.open("", "Error",  "height=300,width=340");
+        hWin.document.write(html_text);
+        } else  {   generateHTML(jsonObj);
+        hWin =  window.open("", "Assignment4",  "height=800,width=600");
+        hWin.document.write(html_text);     } 
+        } else  //else  if  FF, execute script  once  JSON  object  has loaded
+        {   jsonObj.onload=generateHTML(jsonObj);
+        hWin =  window.open("", "Assignment4",  "height=800,width=600");
+        hWin.document.write(html_text);   } hWin.document.close();    
+      }
+}
+
+function generateHTML(jsonObj)      {
+  root=jsonObj.DocumentElement; 
+  html_text="<html><head><title>US Airlines Listings</title></head><body>";
+  html_text+="<table border='2'>";  
+
+  planesh=jsonObj.Mainline.Table.Header;  //  an array of headers
+
+  planes=jsonObj.Mainline.Table.Row;  //  an array of planes
+
+  if(planes == null){
+    alert("There are no airlines content in this file!");
+    exit();
+  }
+  else if (planes != null){
+    planeHeaderList=planesh["Data"];
+    planeNodeList=planes[0];
+    html_text+="<tbody>"; 
+    html_text+="<tr>";  
+    x=0;    y=0;
+    //  output the  headers
+
+    for(i=0;i<planeHeaderList.length;i++)                     { 
+    header=planeHeaderList[i];
+
+    html_text+="<th>"+header+"</th>";       
+    }
+    html_text+="</tr>"; 
+    //  output  out the values
+    for(i=0;i<planes.length;i++)  //do  for all planes  (one  per row)
+    {                                 
+    planeNodeList=planes[i];  //get properties  of  a plane (an object)
+    html_text+="<tr>";            //start a new row of  the output  table
+    var aircraft_keys = Object.keys(planeNodeList);
+    for(j=0;j<aircraft_keys.length;j++) 
+    {
+    prop  = aircraft_keys[j];
+    if (aircraft_keys[j] == "Hubs")
+    { 
+      var hub_length = planeNodeList.Hubs["Hub"].length;
+      if (hub_length !=0){
+      html_text +="<td><ul><li><b>"+ planeNodeList.Hubs["Hub"][0]+"</b></li>";
+      for (k = 1;k<hub_length;k++){
+      html_text +="<li>"+ planeNodeList.Hubs["Hub"][k] +"</li>";
+    }
+    html_text+="</ul></td>"}
+    else{//if there is 0 hub
+      html_text +="<td></td>";
+    }
+    }
+
+    else if(aircraft_keys[j]=="HomePage")
+    {//handle homepages separately
+    html_text+="<td><a href='"+ planeNodeList[prop] +"' >"+ planeNodeList[prop] +"</a></td>";  
+    } 
+    else if(aircraft_keys[j]=="Plane")
+    {//handle images  separately
+    if (planeNodeList[prop] == ""){
+      html_text+="<td> </td>";
+    }else {html_text+="<td><img src='"+ planeNodeList[prop] +"' width='"+300+"' height='"+150+"'></td>";  }
+    
+    } else  
+    {
+    html_text+="<td>"+  planeNodeList[prop] +"</td>";
+    } 
+    } 
+    html_text+="</tr>";                       
+    }                                                       
+    html_text+="</tbody>";  
+    html_text+="</table>";                      
+    html_text+="<noscript></body></html>";    
+  }
+}
+  </script>
+</head>
+
+<body>
+ 
+<div align="center">
+  <form>
+    <br><br><br><br>
+    <b>Enter URL for Airlines List JSON File </b><br><br>
+    <input type="text" size=60 name="URL"><br><br>
+    <input type="button" onClick="viewJSON(this.form)" name = "submit" value="Submit Query">
+
+  </form>
+
+</div>
+<noscript>
+</body>
+</html>
+
+
+
+
